@@ -92,20 +92,19 @@ void MemeticIk::gradientDescent(size_t const i,
 
 void MemeticIk::initPopulation(Robot const& robot,
                                CostFn const& cost_fn,
-                               std::vector<double> const& initial_guess) {
+                               Individual const& initial_individual) {
     std::vector<double> const zero_grad(robot.variables.size(), 0.0);
     population_.resize(params_.population_size);
-    for (size_t i = 0; i < params_.elite_size; ++i) {
-        auto genotype = initial_guess;
-        if (i > 0) {
-            robot.set_random_valid_configuration(genotype);
-        }
+    population_[0] = initial_individual;
+    for (size_t i = 1; i < params_.elite_size; ++i) {
+        std::vector<double> genotype = initial_individual.genes;
+        robot.set_random_valid_configuration(genotype);
         population_[i] = Individual{genotype, cost_fn(genotype), 1.0, zero_grad};
     }
 
     // Initialize children to some dummy values that will be overwritten.
     for (size_t i = params_.elite_size; i < params_.population_size; ++i) {
-        population_[i] = Individual{initial_guess, 0.0, 1.0, zero_grad};
+        population_[i] = Individual{initial_individual.genes, 0.0, 1.0, zero_grad};
     }
 
     // Initialize fitnesses and extinctions
@@ -113,6 +112,14 @@ void MemeticIk::initPopulation(Robot const& robot,
         individual.fitness = cost_fn(individual.genes);
     }
     computeExtinctions();
+}
+
+void MemeticIk::initPopulation(Robot const& robot,
+                               CostFn const& cost_fn,
+                               std::vector<double> const& initial_guess) {
+    std::vector<double> const zero_grad(robot.variables.size(), 0.0);
+    Individual initial{initial_guess, cost_fn(initial_guess), 1.0, zero_grad};
+    initPopulation(robot, cost_fn, initial);
     previous_fitness_.reset();
 }
 
@@ -255,7 +262,11 @@ auto ik_memetic_impl(std::vector<double> const& initial_guess,
         }
         if (ik.checkWipeout()) {
             if (print_debug) fmt::print("Population wipeout\n");
-            ik.initPopulation(robot, cost_fn, initial_guess);
+            if (params.wipeout_keep_best) {
+                ik.initPopulation(robot, cost_fn, ik.best());
+            } else {
+                ik.initPopulation(robot, cost_fn, initial_guess);
+            }
         }
 
         // Check termination condition from other threads finding a solution.

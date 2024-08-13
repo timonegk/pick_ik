@@ -196,3 +196,8 @@ pick_ik:
       gt_eq<>: [0.0],
     }
   }
+  wipeout_keep_best: {
+    type: bool,
+    default_value: false,
+    description: "Keep the best individual in a wipeout",
+  }

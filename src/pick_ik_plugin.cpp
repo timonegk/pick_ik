@@ -196,6 +196,7 @@ class PickIKPlugin : public kinematics::KinematicsBase {
                 ik_params.num_threads = static_cast<size_t>(params.memetic_num_threads);
                 ik_params.stop_on_first_soln = params.memetic_stop_on_first_solution;
                 ik_params.max_generations = static_cast<int>(params.memetic_max_generations);
+                ik_params.wipeout_keep_best = params.wipeout_keep_best;
                 ik_params.max_time = remaining_timeout;
 
                 ik_params.gd_params.step_size = params.gd_step_size;

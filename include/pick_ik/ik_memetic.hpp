@@ -31,6 +31,7 @@ struct MemeticIkParams {
                                            // population is reinitialized.
     int max_generations = 100;             // Maximum iterations for evolutionary algorithm.
     double max_time = 1.0;                 // Maximum time for evolutionary algorithm.
+    bool wipeout_keep_best = false;
 
     size_t num_threads = 1;  // Number of species to solve in parallel.
     // If false, keeps running after finding a solution to further optimize the solution until a
@@ -75,6 +76,9 @@ class MemeticIk {
                          Robot const& robot,
                          CostFn const& cost_fn,
                          GradientIkParams const& gd_params);
+    void initPopulation(Robot const& robot,
+                        CostFn const& cost_fn,
+                        Individual const& initial_individual);
     void initPopulation(Robot const& robot,
                         CostFn const& cost_fn,
                         std::vector<double> const& initial_guess);
